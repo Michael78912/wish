@@ -31,7 +31,7 @@ _ARCHIVE_EXTENSIONS = [
     'iso', 'bz2', 'bz', 'dmg', 'cab', 'jar', 'pyz'
 ]
 
-print(_ARCHIVE_EXTENSIONS, _EXECUTABLE_EXTENSIONS)
+# print(_ARCHIVE_EXTENSIONS, _EXECUTABLE_EXTENSIONS)
 
 class _Command:
     def __init__(self, func):
@@ -82,8 +82,8 @@ def _get_coloured_str(filename):
                 colour = _LS_COLOURS['other']
 
     return ''.join(colour + (filename.split('\\')[-1], cm.Style.RESET_ALL))
-                
-            
+
+
 
 @_Command
 def ls(self, directory='.', mode='normal', colour=True):
@@ -94,8 +94,8 @@ def ls(self, directory='.', mode='normal', colour=True):
     """
     raw = os.listdir(directory)
     string = ''
-    sz = shutil.get_terminal_size()
-    if mode == '__normal__':
+    sz = shutil.get_terminal_size()[0]
+    if mode == 'normal':
         at = 0
         while True:
             str1 = raw[at]
@@ -107,7 +107,9 @@ def ls(self, directory='.', mode='normal', colour=True):
                 str2 = "'" + str2 + "'"
             str1 = str1.ljust(sz // 2, ' ')
             str2 = str2.rjust(sz // 2, ' ')
-            
-            
-            
-        
+            string += str1 + str2 + '\n'
+            at += 2
+
+    print(string)
+
+print(ls(ls))
