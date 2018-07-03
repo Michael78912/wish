@@ -51,15 +51,18 @@ def main():
     while True:
         print(
             colorama.Fore.RED + \
-            os.getlogin() + ': ' +\
+            os.getlogin() + ': ' + \
             colorama.Fore.BLUE + os.getcwd() + \
             colorama.Fore.GREEN + '$ ' + colorama.Fore.RESET,
             end='')
 
-        command = input()
+        try:
+            command = input()
 
-        
-        
+        except EOFError:  # Ctrl + C or Ctrl + Z + Enter
+            raise SystemExit(0)
+
+
+
 if __name__ == '__main__':
     main()
-    

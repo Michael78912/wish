@@ -1,5 +1,7 @@
 *.exe
 *.pyd
+*.aps
+
 # directories
 __pycache__
 build
