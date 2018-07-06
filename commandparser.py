@@ -16,6 +16,7 @@ PATHEXT = os.environ['pathext'].split(';')
 PATH = os.environ['path'].split(';') + [os.getcwd()]
 
 
+
 def _rm_ext(fname):
     d = fname.split('.')[:-1]
     return '.'.join(d)
@@ -56,10 +57,12 @@ PATH_CMDS = list(
         lambda x: x.upper().endswith(tuple(os.getenv('pathext').split(';'))),
         _get_path()))
 ALL_CMDS = commands.__all__ + PATH_CMDS
+PATH_CMDS = [i.upper() for i in PATH_CMDS]
 
 
 class _PathCmds:
     base = PATH_CMDS
+
     def __contains__(self, item):
         item = item.upper()
         for i in PATHEXT:
@@ -78,7 +81,7 @@ class _PathCmds:
                 print(item + i)
                 return item + i
 
-            elif item in i:
+            elif item in self.base:
                 print(item)
                 return item
 
@@ -119,11 +122,8 @@ class CommandParser:
             cmd = lambda: cmd_f(self.args[1:])
 
         elif self.args[0] in PATH_CMDS:
-            cmd = _ExecutableCommand(self.args[0])
+            cmd = _ExecutableCommand(PATH_CMDS[self.args[0]], self.args[1:])
 
-        if cmd is None:
+        if cmd == None:
             raise TypeError('Command ')
         return cmd
-
-
-print(PATH_CMDS['cmd'])
