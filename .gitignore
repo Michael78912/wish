@@ -1,6 +1,7 @@
 *.exe
 *.pyd
 *.aps
+*.txt
 
 # directories
 __pycache__
