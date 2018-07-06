@@ -12,7 +12,8 @@ import sys
 import os
 import colorama
 
-import commands
+from commandparser import CommandParser
+import completer
 
 def main():
     """
@@ -21,23 +22,25 @@ def main():
 
     # initiate the colorama module for windows
     colorama.init()
+    completer.init()
 
     # create argument parser
     parser = argparse.ArgumentParser(
         description="an improved shell for Windows")
 
     # add optional arguments
-    parser.add_argument('--script', '-s', help='script file to be run',
-                        dest='file', type=open)
-    parser.add_argument('-c', help='execute string and exit',
-                        dest='code', type=str)
-    parser.add_argument('--version', '-v',
-                        help='display version information and exit',
-                        action='store_true')
+    parser.add_argument(
+        '--script', '-s', help='script file to be run', dest='file', type=open)
+    parser.add_argument(
+        '-c', help='execute string and exit', dest='code', type=str)
+    parser.add_argument(
+        '--version',
+        '-v',
+        help='display version information and exit',
+        action='store_true')
 
     # generate sorted arguments
     namespace = parser.parse_args()
-
 
     # -v or --version were passed
     if namespace.version:
@@ -58,11 +61,12 @@ def main():
 
         try:
             command = input()
+            cmd = CommandParser(command).get_program()
+            os.environ['exitcode'] = repr(cmd())
+            completer.init()
 
-        except EOFError:  # Ctrl + C or Ctrl + Z + Enter
+        except (EOFError, KeyboardInterrupt):  # Ctrl + C or Ctrl + Z + Enter
             raise SystemExit(0)
 
 
-
-if __name__ == '__main__':
-    main()
+main()
