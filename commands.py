@@ -5,7 +5,7 @@ _Command is a base class for any command
 
 __version__ = '0.0a'
 __author__ = 'Michael Gill <michaelveenstra12@gmail.com>'
-__all__ = ['ls', 'pwd']
+__all__ = ['ls', 'pwd', 'cd', 'mkdir']
 
 import os
 import shutil
@@ -14,6 +14,8 @@ import argparse
 
 from lsutils import _LsItem
 
+VHELP = 'display version information and exit.'
+
 
 class _Command:
     def __init__(self, func):
@@ -21,10 +23,58 @@ class _Command:
         self.__doc__ = func.__doc__
 
     def __call__(self, args):
-        return self.parser(self, args)
+        try:
+            return self.parser(self, args)
+        except SystemExit:
+            # arparse thinks it needs to exit, command missing
+            return 1
 
     def argparse(self, parser):
         self.parser = parser
+
+
+@_Command
+def mkdir(directory):
+    os.mkdir(directory)
+    return 0
+
+
+@mkdir.argparse
+def mkdir_parse(cmd, args):
+    parser = argparse.ArgumentParser(
+        description='create a directory', prog='mkdir')
+    parser.add_argument('name', help='create directory <name>')
+    parser.add_argument('-v', '--version', action='store_true', help=VHELP)
+
+    ns = parser.parse_args(args)
+
+    if ns.version:
+        print('mkdir (WISH VERSION) 0.0a')
+        return 0
+
+    return cmd.func(ns.name)
+
+
+@_Command
+def cd(directory):
+    os.chdir('.')
+    return 0
+
+
+@cd.argparse
+def cd_parse(cmd, args):
+    parser = argparse.ArgumentParser(
+        description="change current directory", prog='cd')
+    parser.add_argument('-v', '--version', action='store_true', help=VHELP)
+    parser.add_argument('directory', help='where to change to')
+
+    ns = parser.parse_args(args)
+
+    if ns.version:
+        print("cd (WISH version) 0.0a")
+        return 0
+
+    return cmd.func(directory=ns.directory)
 
 
 @_Command
@@ -35,12 +85,9 @@ def pwd():
 
 @pwd.argparse
 def pwd_parse(cmd, args):
-    parser = argparse.ArgumentParser(description='output current directory')
-    parser.add_argument(
-        '-v',
-        '--version',
-        action='store_true',
-        help='display version information and exit.')
+    parser = argparse.ArgumentParser(
+        description='output current directory', prog='pwd')
+    parser.add_argument('-v', '--version', action='store_true', help=VHELP)
 
     ns = parser.parse_args(args)
 
@@ -78,7 +125,8 @@ def ls(self, directory='.', colour=True, show_hidden=False):
 
 @ls.argparse
 def ls_parser(cmd, args):
-    parser = argparse.ArgumentParser(description="list directory contents")
+    parser = argparse.ArgumentParser(
+        description="list directory contents", prog='ls')
     parser.add_argument(
         'dir',
         default='.',
@@ -99,11 +147,7 @@ def ls_parser(cmd, args):
         '--list-colour',
         action='store_true',
         help='see list of colours and their meanings.')
-    parser.add_argument(
-        '-v',
-        '--version',
-        action='store_true',
-        help='display version information and exit.')
+    parser.add_argument('-v', '--version', action='store_true', help=VHELP)
 
     ns = parser.parse_args(args)
 
