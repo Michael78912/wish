@@ -15,6 +15,7 @@ import colorama
 from commandparser import CommandParser
 import completer
 
+
 def main():
     """
     gather arguments and start shell.
@@ -53,10 +54,8 @@ def main():
 
     while True:
         print(
-            colorama.Fore.RED + \
-            os.getlogin() + ': ' + \
-            colorama.Fore.BLUE + os.getcwd() + \
-            colorama.Fore.GREEN + '$ ' + colorama.Fore.RESET,
+            colorama.Fore.RED + os.getlogin() + ': ' + colorama.Fore.BLUE +
+            os.getcwd() + colorama.Fore.GREEN + '$ ' + colorama.Fore.RESET,
             end='')
 
         try:
