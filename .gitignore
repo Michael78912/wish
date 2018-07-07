@@ -2,6 +2,7 @@
 *.pyd
 *.aps
 *.txt
+*.log
 
 # directories
 __pycache__
