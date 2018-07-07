@@ -4,8 +4,8 @@ this will eventually have support for pipes, but not yet.
 """
 
 __author__ = 'Michael Gill <michaelveenstra12@gmail.com>'
-__version__ = '0.0a'
-__all__ = ['parse']
+__version__ = '0.1a'
+__all__ = ['CommandParser']
 
 import re
 import commands
@@ -14,7 +14,6 @@ import subprocess
 
 PATHEXT = os.environ['pathext'].split(';')
 PATH = os.environ['path'].split(';') + [os.getcwd()]
-
 
 
 def _rm_ext(fname):
@@ -48,7 +47,7 @@ def _get_path_from_str(cmd):
 
         else:
             if path.upper().split('\\')[-1].startswith(cmd) and \
-              path.upper().split('\\')[-1].endswith(tuple(PATHEXT)):
+                    path.upper().split('\\')[-1].endswith(tuple(PATHEXT)):
                 return path
 
 
@@ -119,7 +118,12 @@ class CommandParser:
             # built-in command
             # print('found command in commands.__all__')
             cmd_f = getattr(commands, self.args[0])
-            cmd = lambda: cmd_f(self.args[1:])
+
+            def cmd(): return cmd_f(self.args[1:])
+
+        elif self.args[0] in commands.ALIAS:
+            # alias
+            cmd = commands.ALIAS[self.args[0]]
 
         elif self.args[0] in PATH_CMDS:
             cmd = _ExecutableCommand(PATH_CMDS[self.args[0]], self.args[1:])
