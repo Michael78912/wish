@@ -5,7 +5,7 @@ _Command is a base class for any command
 
 __version__ = '0.0a'
 __author__ = 'Michael Gill <michaelveenstra12@gmail.com>'
-__all__ = ['ls', 'pwd', 'cd', 'mkdir']
+__all__ = ['ls', 'pwd', 'cd', 'mkdir', 'echo', 'cat', 'alias']
 
 import os
 import shutil
@@ -13,8 +13,10 @@ import re
 import argparse
 
 from lsutils import _LsItem
+from aliasutils import CommandParser
 
 VHELP = 'display version information and exit.'
+ALIAS = {}
 
 
 class _Command:
@@ -32,10 +34,137 @@ class _Command:
     def argparse(self, parser):
         self.parser = parser
 
+@_Command
+def alias(cmd, alias):
+    """
+    tell the command interpreter that alias is equal to cmd
+    """
+    command = CommandParser(cmd)
+    try:
+        ALIAS[alias] = command.get_program()
+    except TypeError:
+        print(command.args[0] + 'command not found')
+        return 1
+    return 0
+
+@alias.argparse
+def alias_parse(cmd, args):
+    parser = argparse.ArgumentParser(description='create an alias for a command', prog='alias')
+    parser.add_argument('alias', help='new name to assign command')
+    parser.add_argument('command', help='command to create the alias for. must be quoted to include multiple arguments.')
+    parser.add_argument('-v', '--version', action='store_true', help=VHELP)
+
+    ns = parser.parse_args(args)
+
+    if ns.version:
+        print('alias (WISH Version) 0.0a')
+        return 0
+
+    return cmd.func(ns.command, ns.alias)
+
+
+
+@_Command
+def cat(fname, newline=True):
+    """
+    output the file contents to stdout
+    """
+    try:
+        print(open(fname).read())
+        return 0
+
+    except PermissionError:
+        print(fname + ': Permission Denied')
+        return 1
+
+    except FileNotFoundError:
+        print(fname + ': File Not Found!')
+        return 1
+
+
+@cat.argparse
+def cat_parse(cmd, args):
+    parser = argparse.ArgumentParser(
+        description="display contents of the file given")
+    parser.add_argument('file', help="display the contents of this file")
+    parser.add_argument(
+        '-n',
+        '--no-newline',
+        action='store_true',
+        dest='newline',
+        help='dont add a newline to the end')
+    parser.add_argument('-v', '--version', action='store_true', help=VHELP)
+
+    ns = parser.parse_args(args)
+
+    if ns.version:
+        print('cat (WISH Version) 0.0a')
+    return cmd.func(ns.file, ns.newline)
+
+
+
+@_Command
+def echo(string, newline=True, interpret=False):
+    """
+    write output given to this command.
+    backslash escapes: these can be given, and will be evaluated.
+    if you want to include a backslash escapped character, escape it with
+    another backslash. (only applies in backslash interpretation mode (-e))"""
+    if interpret:
+        string = bytes(string, 'utf-8').decode('unicode_escape')
+
+    print(string, end='\n' if newline else '')
+    return 0
+
+
+@echo.argparse
+def echo_parse(cmd, args):
+    parser = argparse.ArgumentParser(
+        description='output the given argument', prog='echo')
+    parser.add_argument(
+        'arg', nargs='*', help='display the given output.', default=[])
+    parser.add_argument(
+        '-n',
+        '--no-newline',
+        action='store_false',
+        help='use this if you dont want a newline at the end of the output')
+    parser.add_argument(
+        '-e',
+        '--interpret',
+        action='store_true',
+        help='interpret backslashes as escape codes.')
+    parser.add_argument('-v', '--version', action='store_true', help=VHELP)
+
+    ns = parser.parse_args(args)
+
+    if ns.version:
+        print('echo (WISH version) 0.0a')
+        return 0
+
+    echo_opts = {
+        'string': ' '.join(ns.arg),
+        'newline': ns.no_newline,
+        'interpret': ns.interpret,
+    }
+
+    return cmd.func(**echo_opts)
+
 
 @_Command
 def mkdir(directory):
-    os.mkdir(directory)
+    """
+    create a Directory
+    """
+    try:
+        os.mkdir(directory)
+
+    except FileNotFoundError:
+        print('File not found')
+        return 1
+
+    except PermissionError:
+        print(directory + ': Access Denied')
+        return 1
     return 0
 
 
@@ -57,6 +186,9 @@ def mkdir_parse(cmd, args):
 
 @_Command
 def cd(directory):
+    """
+    change the current Directory
+    """
     os.chdir('.')
     return 0
 
@@ -79,6 +211,9 @@ def cd_parse(cmd, args):
 
 @_Command
 def pwd():
+    """
+    Print Working Directory (an abbreviation! (It took me years to see that))
+    """
     print(os.getcwd())
     return 0
 
