@@ -9,7 +9,7 @@ I haven't thought of anything else to put here yet, so there you go.
 I've worked this into a somewhat usable state. it now supports calling external programs, a _few_ internal commands (many more being developed), and readline-style tab complete.  
 built in commands so far include:
 
-`ls`, `cd`, `mkdir`, `pwd`. yeah, I know thats barely anything, I'm still working on it :P  
+`ls`, `cd`, `mkdir`, `pwd`, `cat`, `alias`. yeah, I know thats barely anything, I'm still working on it :P  
 
 ## Need to do:
 - make many more commands (echo, set, etc...)
@@ -18,5 +18,6 @@ built in commands so far include:
 - enable access to environment variables
 - **scripting** (thats a big one)
 - different prompts (I want there to be a bunch of different kinds of prompts)
+- initiation script
 
 #### *if you have any more ideas, please comment about them! any suggestions will be looked at!*
