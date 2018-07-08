@@ -4,6 +4,10 @@
 *.txt
 *.log
 
+Pipfile
+Pipfile.lock
+
+
 # directories
 __pycache__
 build
