@@ -5,7 +5,7 @@ _Command is a base class for any command
 
 __version__ = '0.0a'
 __author__ = 'Michael Gill <michaelveenstra12@gmail.com>'
-__all__ = ['ls', 'pwd', 'cd', 'mkdir', 'echo', 'cat', 'alias']
+__all__ = ['ls', 'pwd', 'cd', 'mkdir', 'echo', 'cat', 'alias', 'help']
 
 import os
 import shutil
@@ -18,6 +18,15 @@ from aliasutils import CommandParser
 VHELP = 'display version information and exit.'
 ALIAS = {}
 
+
+HELP = """WISH: Windows Improved SHell
+welcome to wish! a (not yet) improved shell for windows!
+I have vey few built in commands at this point, but oh well.
+list here:
+ls, pwd, cd, mkdir, echo, cat, alias, and help.
+type "help <command>" to see help about each.
+you can also type command --help to see usage/arguments.
+"""
 
 class _Command:
     def __init__(self, func):
@@ -33,6 +42,30 @@ class _Command:
 
     def argparse(self, parser):
         self.parser = parser
+
+@_Command
+def help(item):
+    """display help information on command"""
+    if item in __all__:
+        print(globals()[item].__doc__)
+        return 0
+    else:
+        print(item + ': command not found!')
+        return 1
+
+@help.argparse
+def help_parse(cmd, args):
+    parser = argparse.ArgumentParser(prog='help', description='output help information on command')
+    parser.add_argument('command', help='command to display help on', nargs='?')
+
+
+    ns = parser.parse_args(args)
+
+    if ns.command is None:
+        print(HELP)
+        return 0
+    return cmd.func(ns.command)
+
 
 @_Command
 def alias(cmd, alias):
@@ -189,7 +222,7 @@ def cd(directory):
     """
     change the current Directory
     """
-    os.chdir('.')
+    os.chdir(directory)
     return 0
 
 
