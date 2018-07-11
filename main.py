@@ -12,9 +12,10 @@ import sys
 import os
 import colorama
 
+
 from commandparser import CommandParser
 import completer
-
+import getcommand
 
 def main():
     """
@@ -60,12 +61,12 @@ def main():
 
         try:
             command = input()
-            cmd = CommandParser(command).get_program()
-            os.environ['exitcode'] = repr(cmd())
+            getcommand.runcommand(command)
             completer.init()
 
         except (EOFError, KeyboardInterrupt):  # Ctrl + C or Ctrl + Z + Enter
             raise SystemExit(0)
+
 
 
 main()
