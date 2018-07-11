@@ -60,12 +60,17 @@ def main():
 
         try:
             command = input()
-            cmd = CommandParser(command).get_program()
+            cmdp = CommandParser(command)
+            cmd = cmdp.get_program()
             os.environ['exitcode'] = repr(cmd())
             completer.init()
 
         except (EOFError, KeyboardInterrupt):  # Ctrl + C or Ctrl + Z + Enter
             raise SystemExit(0)
+
+        except TypeError:
+            print(cmdp.args[0] + ': command not found!')
+            os.environ['exitcode'] = '127'  # command not found
 
 
 main()
