@@ -5,12 +5,13 @@ _Command is a base class for any command
 
 __version__ = '0.0a'
 __author__ = 'Michael Gill <michaelveenstra12@gmail.com>'
-__all__ = ['ls', 'pwd', 'cd', 'mkdir', 'echo', 'cat', 'alias', 'help']
+__all__ = ['ls', 'pwd', 'cd', 'mkdir', 'echo', 'cat', 'alias', 'help', 'set']
 
 import os
 import shutil
 import re
 import argparse
+import sys
 
 from lsutils import _LsItem
 from aliasutils import CommandParser
@@ -42,6 +43,31 @@ class _Command:
 
     def argparse(self, parser):
         self.parser = parser
+
+@_Command
+def set(var, val):
+    """
+    sets an a environment variable <var> to <val>.
+    """
+    if not var.isidentifier():
+        print(var + ': invalid identifier', file=sys.stderr)
+        return 1
+    os.environ[var] = val
+    return 0
+
+@set.argparse
+def set_parse(cmd, args):
+    parser = argparse.ArgumentParser(description='set environment variable', prog='set')
+    parser.add_argument('varname', help='name to set val to')
+    parser.add_argument('value', help='value to set')
+    parser.add_argument('-v', '--version', action='version', help=VHELP, version='set (WISH Version) 0.0a')
+
+    ns = parser.parse_args(args)
+
+    return cmd.func(ns.varname, ns.value)
+
+
+
 
 @_Command
 def help(item):
