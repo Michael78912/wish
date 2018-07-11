@@ -100,15 +100,29 @@ class _ExecutableCommand:
 class CommandParser:
     def __init__(self, cmdstr):
         self.cmdstr = cmdstr
-        self.args = self.rm_strings()
+        self.args = self.repl_env_vars()
 
     def rm_strings(self):
-        stringsplit = re.split('(".*")', self.cmdstr)
-        lst = []
-        for i in stringsplit:
-            lst += i.split() if not re.match('".*"', i) else [i.strip('""')]
+        stringsplit = re.split(r'(".*")|\s|(\'.*\')', self.cmdstr)
+        lst = filter(None, stringsplit)
+        return list(lst)
 
-        return lst
+    def repl_env_vars(self):
+        lst = self.rm_strings()
+        new_list = []
+        regex = re.compile(r'\$[a-zA-Z1-9_]+')
+        for i in lst:
+            if regex.match(i):
+                try:
+                    new_list.append(os.environ[i.strip('$')])
+
+                except KeyError:
+                    new_list.append(i)
+            else:
+                new_list.append(i)
+
+        return new_list
+
 
     def get_program(self):
         # print(self.args[0])
