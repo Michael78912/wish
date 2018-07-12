@@ -2,11 +2,16 @@
 pipes.py- a file for redirecting standard files
 """
 
+from io import TextIOWrapper
 import re
+
+
+from commandparser import CommandParser
 
 
 class _Pipe:
     pass
+
 
 class Pipes:
     class OutToIn(_Pipe):
@@ -45,22 +50,168 @@ class Pipes:
         """
         token = '||'
 
+    class Cat(_Pipe):
+        """
+        sends data from file into command
+        """
+        token = '<'
+
+    class CatOneLine(_Pipe):
+        """
+        sends one line of the file into command.
+        """
+        token = '<<'
+
+PIPES = {
+    '>': Pipes.OutToFile,
+    '>>': Pipes.OutToFileA,
+    '<': Pipes.Cat,
+    '<<': Pipes.CatOneLine,
+    '||': Pipes.Or,
+    '|': Pipes.OutToIn,
+    '&&': Pipes.AndS,
+    '&': Pipes.And,
+}
+
 
 class PipeHandler:
     """
     can handle all of the pipes in a command.
     """
+
     def __init__(self, cmdstr):
-        print(re.findall(r'''(?[\|&<>][^'"])[\|&<>]([\|&<>]:[^'"])''', cmdstr))
-        pipes = [x.strip() for x in re.findall(r'''[^'"][\|&><]{1}[^'"]|([<>\|&]|(<<|>>|&&|\|\|))''', cmdstr)]
-        cmds = [x.strip() for x in re.split(r'''[^'"][\|&><]{1}[^'"]''', cmdstr)]
-        print(pipes, cmds)
+        strings = re.split(r'''(['"].*['"])''', cmdstr)
+
+        is_dstr = re.compile(r'(".*")')
+        is_sstr = re.compile(r"('.*')")
+
+        has_pipe = re.compile(r'.*[<>|&]{1,2}.*')
 
         tokens = []
-        for i, p in enumerate(pipes):
-            tokens += [cmds[i], p]
-        tokens.append(cmds[i + 1])
-        print(tokens)
+
+        for i in strings:
+            if is_dstr.match(i):
+                tokens.append(i)
+                continue
+
+            elif is_sstr.match(i):
+                tokens.append(i)
+                continue
+
+            elif has_pipe.match(i):
+                tokens += (split_pipe(i))
+                continue
+
+            tokens.append(i)
 
 
-PipeHandler('echo "howdy>hi" |tee tuna.txt > tuna.txt')
+        joined = join_on_pipes(tokens)
+        self.tokens = joined
+
+    def create(self):
+        """
+        returns a list of commmandparser.CommandParser seperated
+        by the proper Pipe
+        """
+        lst = []
+
+        for i, t in enumerate(self.tokens):
+            if t in '|| | && & >> > << <'.split():
+                lst.append(PIPES[t])
+
+            elif self.tokens[i - 1] in '<'.split():
+                lst.append(open(t))
+
+            elif self.token[i - 1] in '<<':
+                lst.append(open(t, 'r+'))
+
+            elif self.tokens[i - 1] == '>>':
+                lst.append(open(t, 'a'))
+
+            elif self.tokens[i -1] == '>':
+                lst.append(open(t, 'w'))
+
+            else:
+                lst.append(CommandParser(t))
+
+        return lst
+
+    def get_exec(self):
+        """
+        returns a callable object that can be used instead of
+        CommandParser.get_program().
+        """
+        lst = self.create()
+        execlst = []
+        for i in lst:
+            if i.__class__ == CommandParser:
+                execlst.append(i.get_program())
+
+            elif type(i) == TextIOWrapper and i.mode in ('w', 'a'):
+                execlst.append(i.write)
+
+            elif type(i) == TextIOWrapper and i.mode == 'r':
+                execlst.append(i.read)
+
+            elif type(i) == TextIOWrapper and i.mode == 'r+':
+                execlst.append(i.readline)
+
+            else:
+                execlst.append(i)
+
+        return execlst
+
+
+
+def join_on_pipes(tokens):
+    """
+    joins all tokens, except if they are pipes.
+    >>> join_on_pipes(['echo ', "Hello>hi" >> file.txt])
+    ['echo "Hello>hi"', '>>',  'file.txt']
+    """
+    cmds = []
+    pipes = []
+
+    at = 0
+    while True:
+        try:
+            token = tokens[at]
+        except IndexError:
+            break
+        if token in '|| | && & >> > << <'.split():
+            pipes.append(token)
+            at += 1
+            continue
+
+        cmd = ''
+        try:
+            while token not in '|| | && & >> > << <'.split():
+                cmd += token
+                at += 1
+                token = tokens[at]
+        except IndexError:
+            pass
+        cmds.append(cmd)
+
+    # cmds should *always* be 1 index longer than pipes
+
+    pipes.append(None)
+
+    items = []
+
+    for i in zip(cmds, pipes):
+        items += i
+
+    items.pop(-1)
+    # remove the None
+
+    return items
+
+
+def split_pipe(string):
+    return re.split('([<>|&]{1,2})', string)
+
+
+# print(split_pipe('Hi > hioh >> jij'))
+print(PipeHandler('echo "howdy>hi" |tee tuna.txt > tuna.txt').create())
+# print(join_on_pipes(['howdy', '>>', 'boi', '"no"', 'kill me now']))
