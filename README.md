@@ -1,4 +1,4 @@
-![Icon](https://raw.githubusercontent.com/Michael78912/wish/master/img/ico.png)# WISH
+# WISH
 ### Windows Improved SHell
 
 ![LS command](https://raw.githubusercontent.com/Michael78912/wish/master/img/ls.PNG)
