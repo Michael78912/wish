@@ -63,6 +63,8 @@ def main():
 
         try:
             command = input()
+            if command == '':
+                continue
             getcommand.runcommand(command)
             completer.init()
             ctypes.windll.kernel32.SetConsoleTitleW('WISH@' + os.getcwd())
