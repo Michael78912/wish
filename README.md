@@ -1,5 +1,4 @@
-# WISH
-<img src="https://raw.githubusercontent.com/Michael78912/wish/master/img/ico.png" alt="icon" width=64 height=64></img>
+# WISH <img src="https://raw.githubusercontent.com/Michael78912/wish/master/img/ico.png" alt="icon" width=64 height=64></img>
 ### Windows Improved SHell
 
 ![LS command](https://raw.githubusercontent.com/Michael78912/wish/master/img/ls.PNG)
