@@ -105,7 +105,7 @@ class PipeHandler:
             tokens.append(i)
 
 
-        joined = join_on_pipes(tokens)
+        joined = [x.strip() for x in join_on_pipes(tokens)]
         self.tokens = joined
 
     def create(self):
@@ -122,7 +122,7 @@ class PipeHandler:
             elif self.tokens[i - 1] in '<'.split():
                 lst.append(open(t))
 
-            elif self.token[i - 1] in '<<':
+            elif self.tokens[i - 1] in '<<':
                 lst.append(open(t, 'r+'))
 
             elif self.tokens[i - 1] == '>>':
@@ -136,30 +136,17 @@ class PipeHandler:
 
         return lst
 
-    def get_exec(self):
-        """
-        returns a callable object that can be used instead of
-        CommandParser.get_program().
-        """
-        lst = self.create()
-        execlst = []
-        for i in lst:
-            if i.__class__ == CommandParser:
-                execlst.append(i.get_program())
+    def apply(self):
 
-            elif type(i) == TextIOWrapper and i.mode in ('w', 'a'):
-                execlst.append(i.write)
 
-            elif type(i) == TextIOWrapper and i.mode == 'r':
-                execlst.append(i.read)
-
-            elif type(i) == TextIOWrapper and i.mode == 'r+':
-                execlst.append(i.readline)
-
-            else:
-                execlst.append(i)
-
-        return execlst
+    # def run(self):
+    #     objects = self.create()
+    #     for i, obj in enumerate(objects):
+    #         if issubclass(_Pipe, obj.__class__):
+    #             # pipes are only needed to
+    #             continue
+    #         try:
+    #             pipe = objects.index(obj)
 
 
 
@@ -213,5 +200,5 @@ def split_pipe(string):
 
 
 # print(split_pipe('Hi > hioh >> jij'))
-print(PipeHandler('echo "howdy>hi" |tee tuna.txt > tuna.txt').create())
+print(PipeHandler('tee hi << main.py').create())
 # print(join_on_pipes(['howdy', '>>', 'boi', '"no"', 'kill me now']))
