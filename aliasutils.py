@@ -6,6 +6,14 @@ import commands
 PATHEXT = os.environ['pathext'].split(';')
 PATH = os.environ['path'].split(';') + [os.getcwd()]
 
+class _ExecutableCommand:
+    def __init__(self, path, args=()):
+        self.path = path
+        self.args = args
+
+    def __call__(self):
+        return subprocess.call([self.path] + list(self.args))
+
 def _get_path():
     d = []
     for path in PATH:
