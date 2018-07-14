@@ -11,6 +11,7 @@ import argparse
 import sys
 import os
 import colorama
+import ctypes
 
 
 from commandparser import CommandParser
@@ -25,6 +26,7 @@ def main():
     # initiate the colorama module for windows
     colorama.init()
     completer.init()
+    ctypes.windll.kernel32.SetConsoleTitleW('WISH@' + os.getcwd())
 
     # create argument parser
     parser = argparse.ArgumentParser(
@@ -61,8 +63,11 @@ def main():
 
         try:
             command = input()
+            if command == '':
+                continue
             getcommand.runcommand(command)
             completer.init()
+            ctypes.windll.kernel32.SetConsoleTitleW('WISH@' + os.getcwd())
 
         except (EOFError, KeyboardInterrupt):  # Ctrl + C or Ctrl + Z + Enter
             raise SystemExit(0)
