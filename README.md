@@ -1,3 +1,4 @@
+<img src="https://raw.githubusercontent.com/Michael78912/wish/master/img/ico.png" alt="icon" width=128 height=128/>
 # WISH
 ### Windows Improved SHell
 
