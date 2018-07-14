@@ -136,7 +136,38 @@ class PipeHandler:
 
         return lst
 
-    def apply(self):
+    def run(self):
+        """
+        finds all commands, joins them linked between
+        the proper standard files (stdout, stderr, stdin)
+        and chains them properly based on the pipes.
+        return exit code of final command
+        """
+        objs = self.create()
+        getstdout = None
+        stdout = None
+        stdin = None
+        exitcode = None
+
+        for i, obj in enumerate(objs):
+            next = objs[i + 1]
+            if issubclass(_Pipe, next.__class__):
+                # next object in list *is* a pipe
+                if next.__class__ == Pipes.OutToIn:
+                    stdout = obj(stdout=True)[1]
+                    continue
+
+                if next.__class__ == Pipes.CatOneLine:
+                    stdin = obj.readline()
+                    obj(stdin=stdin)
+
+
+
+
+
+
+
+
 
 
     # def run(self):
@@ -200,5 +231,5 @@ def split_pipe(string):
 
 
 # print(split_pipe('Hi > hioh >> jij'))
-print(PipeHandler('tee hi << main.py').create())
+print(PipeHandler('echo hi)
 # print(join_on_pipes(['howdy', '>>', 'boi', '"no"', 'kill me now']))
