@@ -1,3 +1,5 @@
+#!C:\Users\Michael\AppData\Local\Programs\Python\Python37-32\python.exe
+
 """
 WISH: Windows Improved SHell
 this shell aims at being much more efficient than cmd.exe,
@@ -14,7 +16,6 @@ import colorama
 import ctypes
 
 
-from commandparser import CommandParser
 import completer
 import getcommand
 

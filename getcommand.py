@@ -1,4 +1,7 @@
-from commandparser import CommandParser
+import os
+
+
+from pipes import PipeHandler
 
 def getcommand(cmdstr):
     """
@@ -6,15 +9,19 @@ def getcommand(cmdstr):
     an exit code.
     """
 
-    x = CommandParser(cmdstr)
+    x = PipeHandler(cmdstr)
     try:
-        return x.get_program()
+        return x.run()
     except TypeError:
-        print(x.args[0] + ': command not found!')
-        return lambda: 127
+        print(x.tokens[0] + ': command not found!')
+        return 127
 
-def runcommand(cmdstr):
+def runcommand(cmdstr, set_var=True):
     """
     run command, and return exit code.
     """
-    return getcommand(cmdstr)()
+    code = getcommand(cmdstr)
+    if set_var:
+        os.environ['ExitCode'] = repr(code)
+
+    return code

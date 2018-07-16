@@ -10,7 +10,10 @@ __all__ = ['CommandParser']
 import re
 import commands
 import os
+import sys
 import subprocess
+
+from stdabsorb import StdAbsorber, StdinSender
 
 PATHEXT = os.environ['pathext'].split(';')
 PATH = os.environ['path'].split(';') + [os.getcwd()]
@@ -93,8 +96,41 @@ class _ExecutableCommand:
         self.path = path
         self.args = args
 
-    def __call__(self):
-        return subprocess.call([self.path] + list(self.args))
+    def __call__(self, stdout=None, stdin=None, stderr=None):
+        proc = subprocess.run(
+        [self.path] + list(self.args),
+        stdout=subprocess.PIPE if stdout is not None else None,
+        stderr=subprocess.PIPE if stderr is not None else None,
+        input=stdin,
+        )
+
+        returncode = proc.returncode
+        output = proc.stdout
+
+        return [returncode, output]
+
+
+class CallableStdCommand:
+    def __init__(self, item):
+        self.item = item
+
+    def __call__(self, stdout=False, stdin=None):
+        if stdout:
+            StdAbsorber('stdout').set_file()
+
+        if stdin:
+            StdinSender(self.stdin).set()
+
+        toreturn = [self.item(), None]
+
+        if stdin:
+            sys.stdin.reset()
+
+        if stdout:
+            toreturn[1] = sys.stdout.read()
+            sys.stdout.reset()
+
+        return toreturn
 
 
 class CommandParser:
@@ -133,7 +169,8 @@ class CommandParser:
             # print('found command in commands.__all__')
             cmd_f = getattr(commands, self.args[0])
 
-            def cmd(): return cmd_f(self.args[1:])
+            def cmd_x(): return cmd_f(self.args[1:])
+            cmd = CallableStdCommand(cmd_x)
 
         elif self.args[0] in commands.ALIAS:
             # alias

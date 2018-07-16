@@ -13,4 +13,8 @@ desktop.ini
 __pycache__
 build
 dist
+<<<<<<< HEAD
 .idea
+=======
+.idea
+>>>>>>> pipes
