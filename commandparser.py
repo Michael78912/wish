@@ -100,34 +100,35 @@ class _ExecutableCommand:
         proc = subprocess.run(
         [self.path] + list(self.args),
         stdout=subprocess.PIPE if stdout is not None else None,
-        stderr=subprocess.PIPE if stderr is not None else None
+        stderr=subprocess.PIPE if stderr is not None else None,
         input=stdin,
         )
 
         returncode = proc.returncode
         output = proc.stdout
-        err = proc.stderr
 
-        return [returncode, output, err]
+        return [returncode, output]
 
 
 class CallableStdCommand:
     def __init__(self, item):
         self.item = item
-        self.get_stdout = get_stdout
-        self.stdin = None
 
-    def __call__(self, get_stdout=False, stdin=None):
-        if get_stdout:
+    def __call__(self, stdout=False, stdin=None):
+        if stdout:
             StdAbsorber('stdout').set_file()
 
         if stdin:
             StdinSender(self.stdin).set()
 
-        toreturn = [self.item(), None, None]
+        toreturn = [self.item(), None]
 
-        if get_stdout:
+        if stdin:
+            sys.stdin.reset()
+
+        if stdout:
             toreturn[1] = sys.stdout.read()
+            sys.stdout.reset()
 
         return toreturn
 
