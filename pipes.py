@@ -1,10 +1,10 @@
+#!C:\Users\Michael\AppData\Local\Programs\Python\Python37-32\python.exe
 """
 pipes.py- a file for redirecting standard files
 """
 
-from io import TextIOWrapper
-import re
 
+import re
 
 from commandparser import CommandParser
 
@@ -14,6 +14,18 @@ class _Pipe:
 
 
 class Pipes:
+    @classmethod
+    def has(cls, other):
+        return other in (
+            cls.OutToFile,
+            cls.OutToIn,
+            cls.OutToFileA,
+            cls.And,
+            cls.AndS,
+            cls.Or,
+            cls.Cat,
+            cls.CatOneLine,
+        )
     class OutToIn(_Pipe):
         """
         redirects stdout to stdin
@@ -62,6 +74,7 @@ class Pipes:
         """
         token = '<<'
 
+
 PIPES = {
     '>': Pipes.OutToFile,
     '>>': Pipes.OutToFileA,
@@ -104,7 +117,6 @@ class PipeHandler:
 
             tokens.append(i)
 
-
         joined = [x.strip() for x in join_on_pipes(tokens)]
         self.tokens = joined
 
@@ -128,7 +140,7 @@ class PipeHandler:
             elif self.tokens[i - 1] == '>>':
                 lst.append(open(t, 'a'))
 
-            elif self.tokens[i -1] == '>':
+            elif self.tokens[i - 1] == '>':
                 lst.append(open(t, 'w'))
 
             else:
@@ -144,40 +156,65 @@ class PipeHandler:
         return exit code of final command
         """
         objs = self.create()
-        getstdout = None
-        stdout = None
-        stdin = None
-        exitcode = None
+
+        exitcode = 0
 
         for i, obj in enumerate(objs):
-            next = objs[i + 1]
-            if issubclass(_Pipe, next.__class__):
+
+            try:
+                next = objs[i + 1]
+            except IndexError:
+                f = isinstance(obj, CommandParser)
+                if f:
+                    p = obj.get_program()
+                    return p(stdin=stdin)[0]
+                else:
+                    return exitcode
+            f = Pipes.has(next)
+            if f:
+                obj = obj.get_program()
                 # next object in list *is* a pipe
-                if next.__class__ == Pipes.OutToIn:
-                    stdout = obj(stdout=True)[1]
+                if next == Pipes.OutToIn:
+                    exitcode, stdin = obj(stdout=True, stdin=stdin)
+                    stdin = stdin.encode()
                     continue
 
-                if next.__class__ == Pipes.CatOneLine:
-                    stdin = obj.readline()
-                    obj(stdin=stdin)
+                elif next == Pipes.CatOneLine:
+                    stdin = objs[i + 2].readline().encode()
+                    exitcode = obj(stdin=stdin)[0]
+                    stdin = None
+                    break
+
+                elif next == Pipes.Cat:
+                    stdin = objs[i + 2].read().encode()
+                    exitcode = obj(stdin=stdin)[0]
+                    break
+
+                elif next == Pipes.OutToFile or \
+                  next == Pipes.OutToFileA:
+                    exitcode, stdout = obj(stdout=True, stdin=stdin)
+                    stdin = None
+                    objs[i + 2].write(stdout.decode())
+                    break
+
+                elif next == Pipes.Or:
+                    exitcode = obj(stdin=stdin)[0]
+                    stdin = None
+                    success = not exitcode
+                    if success: break
+
+                elif next == Pipes.AndS:
+                    exitcode = obj()[0]
+                    success = not exitcode
+                    stdin = None
+                    if not success: break
+
+
+        return exitcode
 
 
 
 
-
-
-
-
-
-
-    # def run(self):
-    #     objects = self.create()
-    #     for i, obj in enumerate(objects):
-    #         if issubclass(_Pipe, obj.__class__):
-    #             # pipes are only needed to
-    #             continue
-    #         try:
-    #             pipe = objects.index(obj)
 
 
 
@@ -230,6 +267,6 @@ def split_pipe(string):
     return re.split('([<>|&]{1,2})', string)
 
 
-# print(split_pipe('Hi > hioh >> jij'))
-print(PipeHandler('echo hi)
-# print(join_on_pipes(['howdy', '>>', 'boi', '"no"', 'kill me now']))
+print(PipeHandler('cat main.py && echo hi').run())
+
+
