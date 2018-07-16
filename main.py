@@ -16,7 +16,6 @@ import colorama
 import ctypes
 
 
-from commandparser import CommandParser
 import completer
 import getcommand
 
