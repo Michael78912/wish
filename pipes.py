@@ -3,10 +3,11 @@
 pipes.py- a file for redirecting standard files
 """
 
-
+import sys
 import re
 
 from commandparser import CommandParser
+
 
 
 class _Pipe:
@@ -158,6 +159,7 @@ class PipeHandler:
         objs = self.create()
 
         exitcode = 0
+        stdin = None
 
         for i, obj in enumerate(objs):
 
@@ -173,6 +175,7 @@ class PipeHandler:
             f = Pipes.has(next)
             if f:
                 obj = obj.get_program()
+
                 # next object in list *is* a pipe
                 if next == Pipes.OutToIn:
                     exitcode, stdin = obj(stdout=True, stdin=stdin)
