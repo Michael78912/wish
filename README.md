@@ -1,4 +1,4 @@
-# WISH
+# <img src="https://raw.githubusercontent.com/Michael78912/wish/master/img/ico.png" alt="icon" width=64 height=64></img> WISH 
 ### Windows Improved SHell
 
 ![LS command](https://raw.githubusercontent.com/Michael78912/wish/master/img/ls.PNG)
@@ -14,7 +14,7 @@ built in commands so far include:
 `ls`, `cd`, `mkdir`, `pwd`, `cat`, `alias`, `echo`, `help`, `set`. yeah, I know thats barely anything, I'm still working on it :P  
 
 ## Need to do:
-- make many more commands (echo, set, etc...)
+- make many more commands (grep, read, etc...)
 - allow all extensions in %PATHEXT% to be called as programs (access default programs through registry)
 - enable piping
 - enable access to environment variables
