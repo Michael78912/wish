@@ -9,7 +9,6 @@ import re
 from commandparser import CommandParser
 
 
-
 class _Pipe:
     pass
 
@@ -27,6 +26,7 @@ class Pipes:
             cls.Cat,
             cls.CatOneLine,
         )
+
     class OutToIn(_Pipe):
         """
         redirects stdout to stdin
@@ -194,7 +194,7 @@ class PipeHandler:
                     break
 
                 elif next == Pipes.OutToFile or \
-                  next == Pipes.OutToFileA:
+                        next == Pipes.OutToFileA:
                     exitcode, stdout = obj(stdout=True, stdin=stdin)
                     stdin = None
                     objs[i + 2].write(stdout.decode())
@@ -204,21 +204,17 @@ class PipeHandler:
                     exitcode = obj(stdin=stdin)[0]
                     stdin = None
                     success = not exitcode
-                    if success: break
+                    if success:
+                        break
 
                 elif next == Pipes.AndS:
                     exitcode = obj()[0]
                     success = not exitcode
                     stdin = None
-                    if not success: break
-
+                    if not success:
+                        break
 
         return exitcode
-
-
-
-
-
 
 
 def join_on_pipes(tokens):
@@ -271,5 +267,3 @@ def split_pipe(string):
 
 
 print(PipeHandler('cat main.py && echo hi').run())
-
-

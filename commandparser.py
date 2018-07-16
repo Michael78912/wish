@@ -98,10 +98,10 @@ class _ExecutableCommand:
 
     def __call__(self, stdout=None, stdin=None, stderr=None):
         proc = subprocess.run(
-        [self.path] + list(self.args),
-        stdout=subprocess.PIPE if stdout is not None else None,
-        stderr=subprocess.PIPE if stderr is not None else None,
-        input=stdin,
+            [self.path] + list(self.args),
+            stdout=subprocess.PIPE if stdout is not None else None,
+            stderr=subprocess.PIPE if stderr is not None else None,
+            input=stdin,
         )
 
         returncode = proc.returncode
@@ -159,7 +159,6 @@ class CommandParser:
 
         return new_list
 
-
     def get_program(self):
         # print(self.args[0])
         cmd = None
@@ -169,7 +168,9 @@ class CommandParser:
             # print('found command in commands.__all__')
             cmd_f = getattr(commands, self.args[0])
 
-            def cmd_x(): return cmd_f(self.args[1:])
+            def cmd_x():
+                return cmd_f(self.args[1:])
+
             cmd = CallableStdCommand(cmd_x)
 
         elif self.args[0] in commands.ALIAS:

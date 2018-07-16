@@ -16,6 +16,7 @@ def getcommand(cmdstr):
         print(x.tokens[0] + ': command not found!')
         return 127
 
+
 def runcommand(cmdstr, set_var=True):
     """
     run command, and return exit code.
