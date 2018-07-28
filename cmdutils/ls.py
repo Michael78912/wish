@@ -71,7 +71,7 @@ def _get_coloured_str(filename):
 
     return ''.join(colour + (filename.split('\\')[-1], cm.Style.RESET_ALL))
 
-class _LsItem:
+class LsItem:
     """
     base class for ls files.
     """
