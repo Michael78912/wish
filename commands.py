@@ -13,8 +13,8 @@ import re
 import argparse
 import sys
 
-from lsutils import _LsItem
-from aliasutils import CommandParser
+from cmdutils.ls import LsItem
+from cmdutils.alias import CommandParser
 
 VHELP = 'display version information and exit.'
 ALIAS = {}
@@ -73,7 +73,7 @@ def set_parse(cmd, args):
 def help(item):
     """display help information on command"""
     if item in __all__:
-        print(globals()[item].__doc__)
+        print(globals()[item].__doc__ or item + ': command not found')
         return 0
     else:
         print(item + ': command not found!')
@@ -306,14 +306,14 @@ def ls(self, directory='.', colour=True, show_hidden=False):
 
     try:
         for item in raw:
-            _LsItem(os.path.join(directory, item))
+            LsItem(os.path.join(directory, item))
 
     except (PermissionError, OSError):
         print('ls: %s: Permission Denied' % directory)
         return 1
 
-    print(_LsItem.sort(show_hidden))
-    _LsItem.clear()
+    print(LsItem.sort(show_hidden))
+    LsItem.clear()
     return 0
 
 
