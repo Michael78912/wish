@@ -14,8 +14,9 @@ import sys
 import os
 import colorama
 import ctypes
+import re
 
-
+from scripting.parser import loads
 import completer
 import getcommand
 
@@ -35,7 +36,7 @@ def main():
 
     # add optional arguments
     parser.add_argument(
-        '--script', '-s', help='script file to be run', dest='file', type=open)
+        '--script', '-s', help='script file to be run', dest='file', type=loads)
     parser.add_argument(
         '-c', help='execute string and exit', dest='code', type=str)
     parser.add_argument(
@@ -45,7 +46,12 @@ def main():
         action='store_true')
 
     # generate sorted arguments
-    namespace = parser.parse_args()
+    try:
+        namespace = parser.parse_args()
+
+    except FileNotFoundError:
+        print('file not found!')
+        raise SystemExit(2)
 
     # -v or --version were passed
     if namespace.version:
@@ -54,7 +60,8 @@ def main():
 
     # -s or --script were passed
     if namespace.file:
-        sys.stderr.write('script files not yet implemented')
+        namespace.file.run()
+        raise SystemExit
 
     while True:
         print(
@@ -66,6 +73,17 @@ def main():
             command = input()
             if command == '':
                 continue
+
+            if re.match('exit\s+.*', command, re.IGNORECASE):
+                code = re.match('exit\s+(.*)').group(1)
+                try:
+                    code = int(code)
+                except ValueError:
+                    code = 0
+                raise SystemExit(code)
+            elif command.lower().strip() == 'exit':
+                raise SystemExit(0)
+
             getcommand.runcommand(command)
             completer.init()
             ctypes.windll.kernel32.SetConsoleTitleW('WISH@' + os.getcwd())
@@ -73,6 +91,5 @@ def main():
         except (EOFError, KeyboardInterrupt):  # Ctrl + C or Ctrl + Z + Enter
             raise SystemExit(0)
 
-
-
-main()
+if __name__ == '__main__':
+    main()

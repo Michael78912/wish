@@ -132,7 +132,8 @@ class PipeHandler:
                         next == Pipes.OutToFileA:
                     exitcode, stdout = obj(stdout=True, stdin=stdin)
                     stdin = None
-                    objs[i + 2].write(stdout.decode())
+                    # on different versions this may sometitmes vary
+                    objs[i + 2].write(stdout.decode() if type(stdout) == bytes else stdout)
                     break
 
                 elif next == Pipes.Or:
@@ -199,6 +200,3 @@ def join_on_pipes(tokens):
 
 def split_pipe(string):
     return re.split('([<>|&]{1,2})', string)
-
-
-print(PipeHandler('cat main.py && echo hi').run())
