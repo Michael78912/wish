@@ -12,6 +12,7 @@ desktop.ini
 # directories
 __pycache__
 build
+_compiling
 dist
 <<<<<<< HEAD
 .idea
