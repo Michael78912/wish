@@ -13,11 +13,16 @@ built in commands so far include:
 
 `ls`, `cd`, `mkdir`, `pwd`, `cat`, `alias`, `echo`, `help`, `set`. yeah, I know thats barely anything, I'm still working on it :P  
 
+## Scripts (if you can call it that)
+It now supports a very basic form of script, basically just a list of commands.  
+to run one (with source) type `py -3 wish.py -s <scriptname>`  
+if you installed with the installer, then type `wish -s <scriptname>` (it should be in PATH)  
+
 ## Need to do:
 - make many more commands (grep, read, etc...)
 - allow all extensions in %PATHEXT% to be called as programs (access default programs through registry)
-- enable piping
-- enable access to environment variables
+- enable piping ✓
+- enable access to environment variables ✓
 - **scripting** (thats a big one)
 - different prompts (I want there to be a bunch of different kinds of prompts)
 - initiation script
